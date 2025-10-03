@@ -5,9 +5,11 @@ import Suggestion from "@/components/appComp/Suggestion";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState } from "react";
 import { useDatingChat } from "@/utils/useDatingChat";
+import { useApiKey } from "@/contexts/ApiKeyContext";
 
 const HomePage = () => {
   const { messages, input, setInput, append, isLoading } = useDatingChat();
+  const { hasApiKey, openModal } = useApiKey();
 
   const [isInputExpanded, setIsInputExpanded] = React.useState(false);
 
@@ -27,6 +29,10 @@ const HomePage = () => {
   };
 
   const handleSuggestionClick = (suggestion: string) => {
+    if (!hasApiKey) {
+      openModal();
+      return;
+    }
     handleSendMessage(suggestion);
   };
 

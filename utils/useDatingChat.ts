@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useApiKey } from "@/contexts/ApiKeyContext";
 
 interface Message {
   id: string;
@@ -19,6 +20,7 @@ interface UseDatingChatReturn {
 }
 
 export function useDatingChat(): UseDatingChatReturn {
+  const { apiKey } = useApiKey();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "system-1",
@@ -50,6 +52,7 @@ export function useDatingChat(): UseDatingChatReturn {
             body: JSON.stringify({
               messages: [...messages, message],
               data: { context: "" },
+              apiKey: apiKey,
             }),
           });
 

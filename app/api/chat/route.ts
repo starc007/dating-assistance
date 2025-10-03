@@ -9,8 +9,20 @@ const ai = new GoogleGenAI({
 
 export async function POST(req: Request) {
   try {
-    const { messages, data } = await req.json();
+    const { messages, data, apiKey } = await req.json();
     const context = data?.context || "";
+
+    // Use user-provided API key or fallback to environment variable
+    const userApiKey = apiKey;
+
+    if (!userApiKey) {
+      return new Response("API key is required", { status: 400 });
+    }
+
+    // Create AI instance with user's API key
+    const userAi = new GoogleGenAI({
+      apiKey: userApiKey,
+    });
 
     // Get the last user message
     const lastMessage = messages[messages.length - 1];
@@ -19,7 +31,7 @@ export async function POST(req: Request) {
     // Combine system instruction with context
     const systemInstruction = `${DATING_AI_CONTEXT}\n\n${context}`;
 
-    const response = await ai.models.generateContentStream({
+    const response = await userAi.models.generateContentStream({
       model: "gemini-2.5-flash",
       contents: userContent,
       config: {

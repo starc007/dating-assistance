@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "../ui/Button";
 import { ArrowUp } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
+import { useApiKey } from "@/contexts/ApiKeyContext";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -10,7 +11,15 @@ interface ChatInputProps {
 }
 
 const ChatInput = ({ onSendMessage, value, onChange }: ChatInputProps) => {
+  const { hasApiKey, openModal, closeModal, setApiKey, isModalOpen } =
+    useApiKey();
+
   const handleSubmit = () => {
+    if (!hasApiKey) {
+      openModal();
+      return;
+    }
+
     if (value.trim()) {
       onSendMessage(value);
     }
