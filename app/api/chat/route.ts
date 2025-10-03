@@ -3,10 +3,6 @@ export const runtime = "edge";
 import { DATING_AI_CONTEXT } from "@/utils/ai-config";
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_API_KEY,
-});
-
 export async function POST(req: Request) {
   try {
     const { messages, data, apiKey } = await req.json();

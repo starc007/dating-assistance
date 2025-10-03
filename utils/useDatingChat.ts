@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useApiKey } from "@/contexts/ApiKeyContext";
+import { apiKeyStorage } from "@/utils/api-key-storage";
 
 interface Message {
   id: string;
@@ -20,7 +21,7 @@ interface UseDatingChatReturn {
 }
 
 export function useDatingChat(): UseDatingChatReturn {
-  const { apiKey } = useApiKey();
+  const { apiKey, isApiKeyLoaded } = useApiKey();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "system-1",
@@ -44,6 +45,19 @@ export function useDatingChat(): UseDatingChatReturn {
         setIsLoading(true);
 
         try {
+          // Get API key - use context if loaded, otherwise fetch from localStorage
+          let currentApiKey = apiKey;
+          if (!isApiKeyLoaded || !currentApiKey) {
+            currentApiKey = apiKeyStorage.getApiKey();
+          }
+
+          // Throw error if no API key found
+          if (!currentApiKey) {
+            throw new Error(
+              "No API key found. Please add your Google Gemini API key."
+            );
+          }
+
           const response = await fetch("/api/chat", {
             method: "POST",
             headers: {
@@ -52,7 +66,7 @@ export function useDatingChat(): UseDatingChatReturn {
             body: JSON.stringify({
               messages: [...messages, message],
               data: { context: "" },
-              apiKey: apiKey,
+              apiKey: currentApiKey,
             }),
           });
 
@@ -109,12 +123,19 @@ export function useDatingChat(): UseDatingChatReturn {
           }
         } catch (error) {
           console.error("Error:", error);
+
+          // Show specific error message for missing API key
+          const errorMessage =
+            error instanceof Error && error.message.includes("API key")
+              ? "Please add your Google Gemini API key to continue. Click the settings icon in the top right corner."
+              : "Sorry, I encountered an error. Please try again.";
+
           setMessages((prev) => [
             ...prev,
             {
               id: Date.now().toString(),
               role: "assistant",
-              content: "Sorry, I encountered an error. Please try again.",
+              content: errorMessage,
             },
           ]);
         } finally {
@@ -122,7 +143,7 @@ export function useDatingChat(): UseDatingChatReturn {
         }
       }
     },
-    [messages]
+    [messages, apiKey, isApiKeyLoaded]
   );
 
   return {

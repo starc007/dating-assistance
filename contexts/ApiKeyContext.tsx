@@ -12,6 +12,7 @@ import { apiKeyStorage } from "@/utils/api-key-storage";
 interface ApiKeyContextType {
   apiKey: string | null;
   hasApiKey: boolean;
+  isApiKeyLoaded: boolean;
   setApiKey: (apiKey: string) => void;
   removeApiKey: () => void;
   isModalOpen: boolean;
@@ -27,12 +28,14 @@ interface ApiKeyProviderProps {
 
 export const ApiKeyProvider = ({ children }: ApiKeyProviderProps) => {
   const [apiKey, setApiKeyState] = useState<string | null>(null);
+  const [isApiKeyLoaded, setIsApiKeyLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Load API key from localStorage on mount
   useEffect(() => {
     const storedApiKey = apiKeyStorage.getApiKey();
     setApiKeyState(storedApiKey);
+    setIsApiKeyLoaded(true);
   }, []);
 
   const setApiKey = (newApiKey: string) => {
@@ -53,6 +56,7 @@ export const ApiKeyProvider = ({ children }: ApiKeyProviderProps) => {
   const value: ApiKeyContextType = {
     apiKey,
     hasApiKey,
+    isApiKeyLoaded,
     setApiKey,
     removeApiKey,
     isModalOpen,
